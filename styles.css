@@ -253,6 +253,123 @@ footer a{ color:var(--lav-deep) }
 
 #confetti{ position:fixed; inset:0; width:100%; height:100%; pointer-events:none; z-index:9999; }
 
+/* ===================== App shell (sections + nav) ===================== */
+body{ padding-bottom:calc(86px + env(safe-area-inset-bottom)); }
+.title-row{ position:relative; }
+.icon-btn{
+  position:absolute; right:6px; top:50%; transform:translateY(-50%);
+  border:none; background:var(--surface); cursor:pointer; font-size:1.1rem;
+  width:40px; height:40px; border-radius:50%; box-shadow:var(--shadow);
+}
+.icon-btn:hover{ transform:translateY(-50%) scale(1.05); }
+.view-section{ max-width:1080px; margin:0 auto; padding:0 16px; }
+.subtabs{ display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin:16px auto 4px; }
+.subtabs .tab{ padding:9px 16px; font-size:.92rem; }
+
+/* Drawer */
+.drawer-toggle{
+  display:block; margin:12px auto 0; border:none; cursor:pointer; font-family:inherit; font-weight:700;
+  font-size:.85rem; color:var(--ink); background:var(--surface); padding:8px 18px; border-radius:99px; box-shadow:var(--shadow);
+}
+.drawer-toggle .chev{ display:inline-block; transition:transform .2s; }
+.drawer-toggle.open .chev{ transform:rotate(180deg); }
+.drawer{ overflow:hidden; max-height:400px; transition:max-height .3s ease, opacity .2s; opacity:1; margin-top:10px; }
+.drawer.collapsed{ max-height:0; opacity:0; margin-top:0; }
+.controls{ margin-top:10px; }
+
+/* Bottom nav */
+.bottom-nav{
+  position:fixed; left:0; right:0; bottom:0; z-index:500;
+  display:flex; justify-content:center; gap:6px;
+  background:var(--surface); box-shadow:0 -4px 18px rgba(150,120,150,.18);
+  padding:8px 8px calc(8px + env(safe-area-inset-bottom)); border-top-left-radius:22px; border-top-right-radius:22px;
+}
+.navbtn{
+  flex:1; max-width:140px; border:none; cursor:pointer; font-family:inherit; font-weight:700; font-size:.72rem;
+  color:var(--ink-soft); background:transparent; border-radius:16px; padding:6px 4px;
+  display:flex; flex-direction:column; align-items:center; gap:2px; transition:background .2s, color .2s;
+}
+.navbtn .ni{ font-size:1.4rem; }
+.navbtn.active{ color:var(--ink); background:linear-gradient(135deg,var(--pink),var(--lav)); }
+
+/* Season switch tabs */
+.season-switch{ display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin:18px auto 6px; }
+.seasontab{
+  border:2px solid var(--surface); cursor:pointer; font-family:inherit; font-weight:700; font-size:.9rem; color:var(--ink);
+  background:var(--surface); padding:8px 16px; border-radius:99px; box-shadow:var(--shadow); transition:transform .12s;
+}
+.seasontab:hover{ transform:translateY(-1px); }
+.seasontab.active.st-Spring{ background:#d6f5dd; border-color:var(--mint-deep); }
+.seasontab.active.st-Summer{ background:var(--lemon); border-color:var(--lemon-deep); }
+.seasontab.active.st-Fall{ background:var(--peach); border-color:#e8a87c; }
+.seasontab.active.st-Winter{ background:var(--blue); border-color:var(--lav-deep); }
+
+/* ===================== Calendar ===================== */
+.cal-setday{ display:flex; gap:8px; align-items:center; justify-content:center; flex-wrap:wrap; margin:6px auto 14px; font-size:.85rem; }
+.cal-setday select, .cal-setday input{ font-family:inherit; font-size:.85rem; color:var(--ink); background:var(--surface); border:2px solid var(--surface-2); border-radius:10px; padding:6px 8px; }
+.cal-setday input{ width:70px; text-align:center; }
+.cal-setday button{ border:none; cursor:pointer; font-family:inherit; font-weight:700; font-size:.8rem; color:var(--ink); background:var(--mint); padding:6px 14px; border-radius:99px; box-shadow:var(--shadow); }
+.cal-setday button.ghost{ background:var(--surface); color:var(--ink-soft); }
+.nextbday{ background:var(--pink); padding:5px 12px; border-radius:99px; font-size:.8rem; }
+.cal-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:6px; max-width:720px; margin:0 auto; }
+.cal-dow{ text-align:center; font-weight:700; font-size:.72rem; color:var(--ink-soft); padding:2px 0; }
+.cal-cell{
+  position:relative; aspect-ratio:1/1; background:var(--surface); border:2px solid var(--surface-2); border-radius:14px;
+  padding:3px; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; overflow:hidden;
+}
+.cal-cell.has-fest{ background:var(--lemon); cursor:pointer; }
+.cal-cell.is-today{ border-color:var(--pink-deep); box-shadow:0 0 0 3px var(--pink); }
+.cal-num{ font-size:.72rem; font-weight:700; color:var(--ink-soft); align-self:flex-start; }
+.cal-fest{ position:absolute; top:2px; right:3px; font-size:.85rem; }
+.cal-bdays{ display:flex; flex-wrap:wrap; gap:1px; justify-content:center; margin-top:auto; }
+.cal-bday{ width:30px; height:30px; border-radius:50%; object-fit:cover; cursor:pointer; border:2px solid var(--pink-deep); background:var(--surface); transition:transform .12s; }
+.cal-bday:hover{ transform:scale(1.12); }
+.cal-legend{ text-align:center; color:var(--ink-soft); font-size:.78rem; margin:14px auto; }
+@media(max-width:560px){ .cal-bday{ width:22px; height:22px; } .cal-num{ font-size:.62rem; } }
+
+/* ===================== NPC modal ===================== */
+.backdrop{ position:fixed; inset:0; background:rgba(60,40,70,.45); z-index:900; }
+.npc-modal, .settings-panel{
+  position:fixed; z-index:1000; left:50%; top:50%; transform:translate(-50%,-50%);
+  width:min(420px,92vw); max-height:84vh; overflow:auto;
+  background:var(--card); border-radius:24px; box-shadow:0 18px 50px rgba(80,50,90,.4); padding:20px;
+  border:3px solid var(--surface);
+}
+.npc-close{ position:absolute; right:12px; top:12px; border:none; background:var(--surface-2); cursor:pointer; width:32px; height:32px; border-radius:50%; font-size:.9rem; color:var(--ink); }
+.npc-head{ display:flex; align-items:center; gap:14px; margin-bottom:12px; }
+.npc-head img{ width:84px; height:84px; border-radius:18px; object-fit:cover; image-rendering:auto; box-shadow:var(--shadow); }
+.npc-head h3{ font-size:1.4rem; }
+.npc-bday{ color:var(--pink-deep); font-weight:700; font-size:.9rem; }
+.npc-loves h4{ font-size:.95rem; margin:6px 0; }
+.loves-chips{ display:flex; flex-wrap:wrap; gap:6px; }
+.love-chip{ background:var(--pink); padding:5px 11px; border-radius:99px; font-size:.8rem; font-weight:600; }
+
+/* ===================== Settings panel ===================== */
+.settings-panel h3{ font-size:1.2rem; margin-bottom:10px; }
+.settings-panel h4{ font-size:.9rem; color:var(--ink-soft); margin:14px 0 6px; }
+.set-row{ display:flex; gap:8px; flex-wrap:wrap; }
+.set-row button{ flex:1; min-width:96px; border:none; cursor:pointer; font-family:inherit; font-weight:600; font-size:.85rem; color:var(--ink); background:var(--surface); padding:10px 12px; border-radius:14px; box-shadow:var(--shadow); }
+.set-row #btnDark.on{ background:var(--lav); } .set-row #btnSound.on{ background:var(--lemon); } .set-row #btnPetals.on{ background:var(--pink); }
+.set-note{ font-size:.76rem; color:var(--ink-soft); margin:12px 0; }
+.settings-close{ width:100%; border:none; cursor:pointer; font-family:inherit; font-weight:700; color:var(--ink); background:linear-gradient(135deg,var(--pink),var(--lav)); padding:11px; border-radius:14px; }
+
+/* ===================== Crops ===================== */
+.crop-sortbar{ display:flex; gap:6px; align-items:center; justify-content:center; flex-wrap:wrap; margin:6px auto 14px; }
+.cropsort.active{ background:var(--mint); border-color:var(--mint-deep); }
+.crop-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:14px; }
+.crop-card{ background:var(--card); border-radius:20px; box-shadow:var(--shadow); border:3px solid var(--surface); padding:14px; text-align:center; }
+.crop-card.type-tree{ border-color:#cdebc2; }
+.crop-card.type-special{ border-color:var(--lav); }
+.crop-img{ width:52px; height:52px; image-rendering:pixelated; object-fit:contain; filter:drop-shadow(0 2px 2px rgba(0,0,0,.12)); }
+.crop-name{ font-weight:700; font-size:1rem; margin:6px 0 8px; }
+.crop-stats{ display:flex; flex-direction:column; gap:3px; font-size:.8rem; }
+.crop-stats .cs{ display:flex; justify-content:space-between; padding:2px 6px; border-radius:8px; }
+.crop-stats .cs span{ color:var(--ink-soft); }
+.crop-stats .cs.hl{ background:var(--lemon); font-weight:700; }
+.crop-note{ font-size:.72rem; color:var(--ink-soft); margin-top:8px; font-style:italic; }
+.crop-tags{ display:flex; flex-wrap:wrap; gap:5px; justify-content:center; margin-top:8px; }
+.crop-tags .tag.src{ background:var(--surface-2); color:var(--ink-soft); }
+
 @media(max-width:520px){
   .room-head .reward,.season-head .sub{display:none}
   header h1{font-size:1.5rem}

@@ -1,8 +1,9 @@
 /* Stardew Bundle Tracker — service worker (offline support)
    Bump CACHE when you change core files to push updates to installed apps. */
-const CACHE = "sdv-tracker-v2";
+const CACHE = "sdv-tracker-v3";
 const CORE = [
-  "./", "./index.html", "./styles.css", "./app.js", "./data.js",
+  "./", "./index.html", "./styles.css", "./app.js",
+  "./data.js", "./data-npcs.js", "./data-crops.js",
   "./manifest.json", "./icon-192.png", "./icon-512.png",
   "./apple-touch-icon.png", "./images/junimo.gif"
 ];
