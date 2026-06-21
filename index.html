@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>🌿 Stardew Bundle Tracker</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#ffd6e8">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Bundles">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <canvas id="petals"></canvas>
+
+  <header>
+    <div class="title-row">
+      <img class="mascot" src="images/junimo.gif" alt="Junimo" id="mascot">
+      <h1><span class="leaf">🌿</span> Stardew Bundle Tracker <span class="leaf">🐰</span></h1>
+    </div>
+    <div class="bubble" id="mascotMsg">Let's fill these bundles! 🌱</div>
+    <div class="overall">
+      <div class="bar"><div class="fill" id="overallFill"></div></div>
+      <div class="label" id="overallLabel"></div>
+    </div>
+  </header>
+
+  <!-- Room rewards status -->
+  <div class="rooms-bar" id="roomsBar"></div>
+
+  <div class="tabs">
+    <button class="tab active" id="tabBundle">📦 By Bundle</button>
+    <button class="tab" id="tabSeason">🗓️ By Season</button>
+    <button class="tab" id="tabCart">🛒 Cart List</button>
+    <button class="tab" id="tabToday">☀️ Today</button>
+  </div>
+
+  <div class="toolbar">
+    <div class="search-wrap">
+      <input id="search" type="text" placeholder="🔎 Search items…" autocomplete="off">
+      <button id="searchClear" title="Clear">✕</button>
+    </div>
+    <button id="btnHideDone" class="hide-done">👀 Hide done</button>
+    <button id="btnDark">🌙 Dark</button>
+    <button id="btnSound">🔕 Sound</button>
+    <button id="btnPetals">🌸 Petals</button>
+    <button id="btnExport">💾 Backup</button>
+    <button id="btnImport">📂 Restore</button>
+    <button id="btnReset">🧹 Reset</button>
+  </div>
+
+  <!-- Filters + season highlight (bundle/season views only) -->
+  <div class="controls" id="mainControls">
+    <div class="ctl-group">
+      <span class="ctl-label">Show</span>
+      <button class="chip filter active" data-filter="all">All</button>
+      <button class="chip filter" data-filter="nocart">🚫 Can't buy at Cart</button>
+      <button class="chip filter" data-filter="tricky">🔥 Tricky items</button>
+    </div>
+    <div class="ctl-group">
+      <span class="ctl-label">In-season</span>
+      <button class="chip season active" data-season="">Off</button>
+      <button class="chip season" data-season="Spring">🌸 Spring</button>
+      <button class="chip season" data-season="Summer">🌻 Summer</button>
+      <button class="chip season" data-season="Fall">🍂 Fall</button>
+      <button class="chip season" data-season="Winter">❄️ Winter</button>
+    </div>
+  </div>
+
+  <main class="view">
+    <div id="bundleView"></div>
+    <div id="seasonView" class="hidden"></div>
+    <div id="cartView" class="hidden"></div>
+    <div id="todayView" class="hidden"></div>
+  </main>
+
+  <footer>
+    Made with 🩷 for your farm · Item art &amp; data from the
+    <a href="https://stardewvalleywiki.com" target="_blank" rel="noopener">Stardew Valley Wiki</a>
+    (standard bundles, patch 1.6). Progress is saved in this browser.
+  </footer>
+
+  <canvas id="confetti"></canvas>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+    }
+  </script>
+</body>
+</html>
