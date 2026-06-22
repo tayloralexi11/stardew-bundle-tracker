@@ -39,6 +39,9 @@ const SEASON_ORDER = ["Spring","Summer","Fall","Winter","Any"];
 const slotId = (b,i) => b.id + "-" + i;
 const imgSrc = (item) => "images/" + item.img + ".png";
 const npcImg = (key) => "images/npc_" + key + ".png";
+const gslug = (s) => s.toLowerCase().replace(/&amp;/g,"and").replace(/&/g,"and").replace(/[^a-z0-9]+/g,"_").replace(/^_+|_+$/g,"");
+const giftImg = (name) => "images/g_" + gslug(name) + ".png";
+let vilSearch = "", currentVil = null;
 const goldAmount = (name) => { const m=name.replace(/,/g,"").match(/(\d+)g/); return m?+m[1]:0; };
 const doy = (season, day) => SEASONS.indexOf(season)*28 + (day-1);   // 0..111
 
@@ -323,15 +326,16 @@ function switchView(which){
 }
 
 /* ===================== Section router ===================== */
-const SECTION_TITLE = { bundles:"Stardew Companion", calendar:"📅 Calendar", crops:"🌱 Crop Guide" };
+const SECTION_TITLE = { bundles:"Stardew Companion", calendar:"📅 Calendar", crops:"🌱 Crop Guide", villagers:"👥 Villagers" };
 function showSection(name){
   activeSection=name;
-  ["bundles","calendar","crops"].forEach(s=>document.getElementById("view-"+s).classList.toggle("hidden",s!==name));
+  ["bundles","calendar","crops","villagers"].forEach(s=>document.getElementById("view-"+s).classList.toggle("hidden",s!==name));
   document.querySelectorAll(".navbtn").forEach(b=>b.classList.toggle("active",b.dataset.section===name));
   document.getElementById("appTitle").textContent=SECTION_TITLE[name];
   const msg=document.getElementById("mascotMsg");
   if(name==="calendar"){ msg.textContent="Never miss a birthday! 🎂"; renderCalendar(); }
   else if(name==="crops"){ msg.textContent="Happy planting! 🌱"; renderCrops(); }
+  else if(name==="villagers"){ msg.textContent="Get to know the valley! 💛"; if(currentVil) renderVillagerDetail(currentVil); else renderVillagerGrid(); }
   else { refreshProgress(); }
   window.scrollTo({top:0,behavior:"smooth"});
 }
@@ -419,8 +423,9 @@ function openNpc(n){
     `<div class="npc-head"><img src="${npcImg(n.key)}" alt="${n.name}" onerror="this.style.display='none'">`+
     `<div><h3>${n.name}</h3><div class="npc-bday">🎂 ${n.birthday.season} ${n.birthday.day}</div></div></div>`+
     loves+
-    `<p class="set-note">Full villager pages (schedules, all gift tiers, heart events) are coming next! 💛</p>`;
+    `<button class="npc-fullpage" id="npcFull">View full page →</button>`;
   m.querySelector("#npcClose").onclick=closeNpc;
+  m.querySelector("#npcFull").onclick=()=>{ closeNpc(); showSection("villagers"); openVillager(n); };
   m.classList.remove("hidden"); document.getElementById("npcBackdrop").classList.remove("hidden");
 }
 function closeNpc(){ document.getElementById("npcModal").classList.add("hidden"); document.getElementById("npcBackdrop").classList.add("hidden"); }
@@ -466,6 +471,87 @@ function renderCrops(){
     grid.append(card);
   });
   if(!list.length){ const m=document.createElement("div"); m.className="empty-msg"; m.textContent="Nothing grows outdoors here 🥶"; grid.append(m); }
+}
+
+/* ===================== Villagers ===================== */
+function renderVillagerGrid(){
+  document.getElementById("villagerDetail").classList.add("hidden");
+  const grid=document.getElementById("villagerGrid"); grid.classList.remove("hidden"); grid.innerHTML="";
+  let list=[...NPCS].sort((a,b)=>a.name.localeCompare(b.name));
+  if(vilSearch){
+    list=list.filter(n=>{
+      if(n.name.toLowerCase().includes(vilSearch)) return true;
+      // also match a villager by a loved gift name
+      return (n.loves||[]).some(g=>g.toLowerCase().includes(vilSearch));
+    });
+  }
+  if(!list.length){ const m=document.createElement("div"); m.className="empty-msg"; m.textContent="No villagers found 🔎"; grid.append(m); return; }
+  list.forEach(n=>{
+    const card=document.createElement("button"); card.className="vil-card";
+    card.innerHTML=`<img src="${npcImg(n.key)}" alt="${n.name}" loading="lazy" onerror="this.style.visibility='hidden'">`+
+      `<div class="vc-name">${n.name}</div><div class="vc-bday">🎂 ${n.birthday.season} ${n.birthday.day}</div>`;
+    card.onclick=()=>openVillager(n);
+    grid.append(card);
+  });
+}
+function openVillager(n){ currentVil=n; renderVillagerDetail(n); }
+function backToVilGrid(){ currentVil=null; renderVillagerGrid(); window.scrollTo({top:0,behavior:"smooth"}); }
+
+function giftTierHtml(label, emoji, items, uni, cls, collapsed){
+  if(!items.length && !uni) return "";
+  const chips = items.map(it=>
+    `<div class="gift"><img src="${giftImg(it)}" alt="${it}" loading="lazy" onerror="this.style.display='none'"><span>${it}</span></div>`
+  ).join("");
+  const uniNote = uni ? `<div class="uni-note">+ all universal ${label.toLowerCase()}</div>` : "";
+  const body = `<div class="gift-grid">${chips}</div>${uniNote}`;
+  if(collapsed){
+    return `<div class="gift-tier ${cls}"><button class="tier-head collapsible"><span>${emoji} ${label} <b>(${items.length})</b></span><span class="chev">▾</span></button><div class="tier-body collapsed">${body}</div></div>`;
+  }
+  return `<div class="gift-tier ${cls}"><div class="tier-head"><span>${emoji} ${label} <b>(${items.length})</b></span></div><div class="tier-body">${body}</div></div>`;
+}
+
+function heartEventHtml(e, i){
+  const choices = e.choices && e.choices.length
+    ? `<div class="he-choices"><div class="he-choices-h">🗨️ Dialogue choices (friendship points):</div>`+
+      e.choices.map(c=>{ const cl=c.p>0?"pos":(c.p<0?"neg":"zero"); const sign=c.p>0?"+"+c.p:c.p;
+        return `<div class="he-choice"><span>${c.t}</span><b class="${cl}">${sign}</b></div>`; }).join("")+`</div>`
+    : "";
+  const details = e.details ? `<p class="he-details">${e.details}</p>` : "";
+  return `<div class="heart-event">
+    <div class="he-head"><span class="he-hearts">❤️ ${e.hearts||"?"}</span><span class="he-trigger">${e.trigger||""}</span></div>
+    <button class="he-spoiler-btn" data-ev="${i}">🙈 Show walkthrough (spoiler)</button>
+    <div class="he-spoiler collapsed">${details}${choices}</div>
+  </div>`;
+}
+
+function renderVillagerDetail(n){
+  const grid=document.getElementById("villagerGrid"); grid.classList.add("hidden");
+  const d=document.getElementById("villagerDetail"); d.classList.remove("hidden");
+  const tiers =
+    giftTierHtml("Loves","💖",n.loves,n.uni&&n.uni.loves,"t-loves",false)+
+    giftTierHtml("Likes","🙂",n.likes,n.uni&&n.uni.likes,"t-likes",false)+
+    giftTierHtml("Dislikes","😕",n.dislikes,n.uni&&n.uni.dislikes,"t-dislikes",false)+
+    giftTierHtml("Hates","💢",n.hates,n.uni&&n.uni.hates,"t-hates",false)+
+    giftTierHtml("Neutral","😐",n.neutral,n.uni&&n.uni.neutral,"t-neutral",true);
+  const events = (n.hearts && n.hearts.length)
+    ? n.hearts.map((e,i)=>heartEventHtml(e,i)).join("")
+    : `<p class="set-note">No cutscene heart events for ${n.name}. 💌</p>`;
+  d.innerHTML=
+    `<button class="vil-back" id="vilBack">← All villagers</button>`+
+    `<div class="vil-hero"><img src="${npcImg(n.key)}" alt="${n.name}" onerror="this.style.display='none'">`+
+      `<div><h2>${n.name}</h2><div class="vil-bday">🎂 ${n.birthday.season} ${n.birthday.day}</div>`+
+      `<div class="vil-tip">💡 Give a loved gift on their birthday for a big friendship boost!</div></div></div>`+
+    `<div class="gift-tiers">${tiers}</div>`+
+    `<h3 class="he-title">💞 Heart Events</h3>`+
+    `<p class="set-note">Triggers are shown — walkthroughs stay hidden until you tap, so no accidental spoilers.</p>`+
+    `<div class="heart-events">${events}</div>`;
+  d.querySelector("#vilBack").onclick=backToVilGrid;
+  d.querySelectorAll(".tier-head.collapsible").forEach(h=>h.onclick=()=>{ h.classList.toggle("open"); h.nextElementSibling.classList.toggle("collapsed"); });
+  d.querySelectorAll(".he-spoiler-btn").forEach(b=>b.onclick=()=>{
+    const sp=b.nextElementSibling; const open=sp.classList.toggle("collapsed")===false;
+    b.textContent = open ? "🙉 Hide walkthrough" : "🙈 Show walkthrough (spoiler)";
+  });
+  window.scrollTo({top:0,behavior:"smooth"});
 }
 
 /* ===================== Settings panel ===================== */
@@ -595,3 +681,7 @@ const searchEl=document.getElementById("search"), searchClear=document.getElemen
 searchEl.addEventListener("input",()=>{ searchTerm=searchEl.value.trim().toLowerCase(); searchClear.classList.toggle("show",searchTerm.length>0);
   applyView(); if(activeView==="cart") renderCart(); if(activeView==="today") renderToday(); });
 searchClear.onclick=()=>{ searchEl.value=""; searchTerm=""; searchClear.classList.remove("show"); applyView(); if(activeView==="cart")renderCart(); if(activeView==="today")renderToday(); };
+// villager search
+const vilEl=document.getElementById("vilSearch"), vilClear=document.getElementById("vilSearchClear");
+vilEl.addEventListener("input",()=>{ vilSearch=vilEl.value.trim().toLowerCase(); vilClear.classList.toggle("show",vilSearch.length>0); currentVil=null; renderVillagerGrid(); });
+vilClear.onclick=()=>{ vilEl.value=""; vilSearch=""; vilClear.classList.remove("show"); currentVil=null; renderVillagerGrid(); };

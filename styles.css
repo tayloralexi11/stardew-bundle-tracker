@@ -370,6 +370,56 @@ body{ padding-bottom:calc(86px + env(safe-area-inset-bottom)); }
 .crop-tags{ display:flex; flex-wrap:wrap; gap:5px; justify-content:center; margin-top:8px; }
 .crop-tags .tag.src{ background:var(--surface-2); color:var(--ink-soft); }
 
+/* ===================== Villagers ===================== */
+.vil-searchbar{ display:flex; justify-content:center; margin:16px auto 4px; }
+.vil-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:14px; margin-top:8px; }
+.vil-card{
+  border:3px solid var(--surface); cursor:pointer; font-family:inherit; color:var(--ink);
+  background:var(--card); border-radius:20px; box-shadow:var(--shadow); padding:12px 8px; text-align:center; transition:transform .15s, border-color .2s;
+}
+.vil-card:hover{ transform:translateY(-3px); border-color:var(--lav); }
+.vil-card img{ width:72px; height:72px; border-radius:16px; object-fit:cover; box-shadow:var(--shadow); }
+.vc-name{ font-weight:700; font-size:.95rem; margin-top:6px; }
+.vc-bday{ font-size:.72rem; color:var(--ink-soft); }
+
+.vil-back{ border:none; cursor:pointer; font-family:inherit; font-weight:700; font-size:.85rem; color:var(--ink); background:var(--surface); padding:8px 16px; border-radius:99px; box-shadow:var(--shadow); margin:8px 0 14px; }
+.vil-hero{ display:flex; align-items:center; gap:16px; background:var(--card); border-radius:22px; box-shadow:var(--shadow); border:3px solid var(--surface); padding:16px; margin-bottom:16px; }
+.vil-hero img{ width:104px; height:104px; border-radius:20px; object-fit:cover; box-shadow:var(--shadow); }
+.vil-hero h2{ font-size:1.6rem; }
+.vil-bday{ color:var(--pink-deep); font-weight:700; margin:2px 0 6px; }
+.vil-tip{ font-size:.78rem; color:var(--ink-soft); }
+
+.gift-tiers{ display:flex; flex-direction:column; gap:12px; }
+.gift-tier{ background:var(--card); border-radius:18px; box-shadow:var(--shadow); border:2px solid var(--surface); overflow:hidden; }
+.gift-tier.t-loves{ border-color:#ffc1da; } .gift-tier.t-likes{ border-color:#cdebc2; }
+.gift-tier.t-dislikes{ border-color:#ffd9b3; } .gift-tier.t-hates{ border-color:#ffc0c0; }
+.tier-head{ display:flex; justify-content:space-between; align-items:center; width:100%; border:none; background:transparent; font-family:inherit; font-size:1rem; font-weight:700; color:var(--ink); padding:12px 14px; }
+button.tier-head.collapsible{ cursor:pointer; }
+.tier-head .chev{ transition:transform .2s; } .tier-head.open .chev{ transform:rotate(180deg); }
+.tier-body{ padding:0 14px 14px; max-height:1600px; overflow:hidden; transition:max-height .3s, padding .3s, opacity .2s; }
+.tier-body.collapsed{ max-height:0; padding-top:0; padding-bottom:0; opacity:0; }
+.gift-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(96px,1fr)); gap:8px; }
+.gift{ display:flex; align-items:center; gap:6px; background:var(--surface); border-radius:12px; padding:6px 8px; font-size:.76rem; font-weight:600; }
+.gift img{ width:30px; height:30px; image-rendering:pixelated; object-fit:contain; flex:0 0 30px; }
+.uni-note{ font-size:.74rem; color:var(--ink-soft); margin-top:8px; font-style:italic; }
+
+.he-title{ font-size:1.3rem; margin:22px 0 4px; }
+.heart-events{ display:flex; flex-direction:column; gap:12px; }
+.heart-event{ background:var(--card); border-radius:18px; box-shadow:var(--shadow); border:2px solid var(--surface); padding:14px; }
+.he-head{ display:flex; gap:10px; align-items:flex-start; }
+.he-hearts{ flex:0 0 auto; background:var(--pink); color:var(--ink); font-weight:700; font-size:.8rem; padding:4px 10px; border-radius:99px; white-space:nowrap; }
+.he-trigger{ font-size:.86rem; line-height:1.35; }
+.he-spoiler-btn{ margin-top:10px; border:none; cursor:pointer; font-family:inherit; font-weight:700; font-size:.8rem; color:var(--ink); background:var(--lav); padding:7px 14px; border-radius:99px; }
+.he-spoiler{ max-height:2000px; overflow:hidden; transition:max-height .35s, opacity .25s, margin .25s; opacity:1; margin-top:10px; }
+.he-spoiler.collapsed{ max-height:0; opacity:0; margin-top:0; }
+.he-details{ font-size:.84rem; line-height:1.45; color:var(--ink); }
+.he-choices{ margin-top:10px; background:var(--surface); border-radius:12px; padding:10px; }
+.he-choices-h{ font-size:.78rem; font-weight:700; color:var(--ink-soft); margin-bottom:6px; }
+.he-choice{ display:flex; justify-content:space-between; gap:10px; padding:4px 6px; border-radius:8px; font-size:.82rem; }
+.he-choice:nth-child(even){ background:var(--surface-2); }
+.he-choice b.pos{ color:var(--done-deep); } .he-choice b.neg{ color:#e06b6b; } .he-choice b.zero{ color:var(--ink-soft); }
+.npc-fullpage{ width:100%; margin-top:8px; border:none; cursor:pointer; font-family:inherit; font-weight:700; color:var(--ink); background:linear-gradient(135deg,var(--pink),var(--lav)); padding:10px; border-radius:14px; }
+
 @media(max-width:520px){
   .room-head .reward,.season-head .sub{display:none}
   header h1{font-size:1.5rem}
