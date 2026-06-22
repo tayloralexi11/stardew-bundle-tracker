@@ -41,7 +41,20 @@ const imgSrc = (item) => "images/" + item.img + ".png";
 const npcImg = (key) => "images/npc_" + key + ".png";
 const gslug = (s) => s.toLowerCase().replace(/&amp;/g,"and").replace(/&/g,"and").replace(/[^a-z0-9]+/g,"_").replace(/^_+|_+$/g,"");
 const giftImg = (name) => "images/g_" + gslug(name) + ".png";
+const itemImg = (slug) => "images/item_" + slug + ".png";
 let vilSearch = "", currentVil = null;
+let itemSearch = "", currentItem = null;
+let ITEM_BY_SLUG = {}, ITEM_BUNDLES = {}, CROP_BY_SLUG = {}, NPC_BY_KEY = {};
+function buildIndexes(){
+  NPCS.forEach(n=>NPC_BY_KEY[n.key]=n);
+  if (typeof ITEMS !== "undefined") ITEMS.forEach(it=>ITEM_BY_SLUG[it.slug]=it);
+  CROPS.forEach(c=>{ CROP_BY_SLUG[gslug(c.name.replace(/ Tree$/,""))]=c; });
+  DATA.rooms.forEach(room=>room.bundles.forEach(b=>b.items.forEach(it=>{
+    const s=gslug((it.name||"").replace(/\s*\(.*\)$/,""));
+    (ITEM_BUNDLES[s]=ITEM_BUNDLES[s]||new Set()).add(room.emoji+" "+b.name);
+  })));
+}
+const hasItem = (slug) => !!ITEM_BY_SLUG[slug];
 const goldAmount = (name) => { const m=name.replace(/,/g,"").match(/(\d+)g/); return m?+m[1]:0; };
 const doy = (season, day) => SEASONS.indexOf(season)*28 + (day-1);   // 0..111
 
@@ -326,16 +339,17 @@ function switchView(which){
 }
 
 /* ===================== Section router ===================== */
-const SECTION_TITLE = { bundles:"Stardew Companion", calendar:"📅 Calendar", crops:"🌱 Crop Guide", villagers:"👥 Villagers" };
+const SECTION_TITLE = { bundles:"Stardew Companion", calendar:"📅 Calendar", crops:"🌱 Crop Guide", villagers:"👥 Villagers", items:"📦 Item Lookup" };
 function showSection(name){
   activeSection=name;
-  ["bundles","calendar","crops","villagers"].forEach(s=>document.getElementById("view-"+s).classList.toggle("hidden",s!==name));
+  ["bundles","calendar","crops","villagers","items"].forEach(s=>document.getElementById("view-"+s).classList.toggle("hidden",s!==name));
   document.querySelectorAll(".navbtn").forEach(b=>b.classList.toggle("active",b.dataset.section===name));
   document.getElementById("appTitle").textContent=SECTION_TITLE[name];
   const msg=document.getElementById("mascotMsg");
   if(name==="calendar"){ msg.textContent="Never miss a birthday! 🎂"; renderCalendar(); }
   else if(name==="crops"){ msg.textContent="Happy planting! 🌱"; renderCrops(); }
   else if(name==="villagers"){ msg.textContent="Get to know the valley! 💛"; if(currentVil) renderVillagerDetail(currentVil); else renderVillagerGrid(); }
+  else if(name==="items"){ msg.textContent="Look anything up! 📦"; if(currentItem) renderItemDetail(currentItem); else renderItemGrid(); }
   else { refreshProgress(); }
   window.scrollTo({top:0,behavior:"smooth"});
 }
@@ -416,7 +430,7 @@ function openNpc(n){
   const m=document.getElementById("npcModal");
   const loves = n.loves && n.loves.length
     ? `<div class="npc-loves"><h4>💖 Loved gifts</h4><div class="loves-chips">`+
-      n.loves.map(x=>`<span class="love-chip">${x}</span>`).join("")+`</div></div>`
+      n.loves.map(x=>{ const s=gslug(x); return `<button class="love-chip${hasItem(s)?" linked":""}"${hasItem(s)?` data-item="${s}"`:""}>${x}</button>`; }).join("")+`</div></div>`
     : `<p class="set-note">No loved-gift data.</p>`;
   m.innerHTML=
     `<button class="npc-close" id="npcClose">✕</button>`+
@@ -426,6 +440,7 @@ function openNpc(n){
     `<button class="npc-fullpage" id="npcFull">View full page →</button>`;
   m.querySelector("#npcClose").onclick=closeNpc;
   m.querySelector("#npcFull").onclick=()=>{ closeNpc(); showSection("villagers"); openVillager(n); };
+  m.querySelectorAll(".love-chip.linked").forEach(c=>c.onclick=()=>{ closeNpc(); showSection("items"); openItem(c.dataset.item); });
   m.classList.remove("hidden"); document.getElementById("npcBackdrop").classList.remove("hidden");
 }
 function closeNpc(){ document.getElementById("npcModal").classList.add("hidden"); document.getElementById("npcBackdrop").classList.add("hidden"); }
@@ -468,6 +483,8 @@ function renderCrops(){
       (c.note?`<div class="crop-note">${c.note}</div>`:"")+
       `<div class="crop-tags">`+c.seasons.map(s=>`<span class="tag s-${s}">${s}</span>`).join("")+
         `<span class="tag src">${c.seedSrc}</span></div>`;
+    const cslug=gslug(c.name.replace(/ Tree$/,""));
+    if(hasItem(cslug)){ card.classList.add("clickable"); card.onclick=()=>{ showSection("items"); openItem(cslug); }; }
     grid.append(card);
   });
   if(!list.length){ const m=document.createElement("div"); m.className="empty-msg"; m.textContent="Nothing grows outdoors here 🥶"; grid.append(m); }
@@ -499,9 +516,10 @@ function backToVilGrid(){ currentVil=null; renderVillagerGrid(); window.scrollTo
 
 function giftTierHtml(label, emoji, items, uni, cls, collapsed){
   if(!items.length && !uni) return "";
-  const chips = items.map(it=>
-    `<div class="gift"><img src="${giftImg(it)}" alt="${it}" loading="lazy" onerror="this.style.display='none'"><span>${it}</span></div>`
-  ).join("");
+  const chips = items.map(it=>{
+    const slug=gslug(it); const link=hasItem(slug);
+    return `<button class="gift${link?" linked":""}"${link?` data-item="${slug}"`:""}><img src="${giftImg(it)}" alt="${it}" loading="lazy" onerror="this.style.display='none'"><span>${it}</span></button>`;
+  }).join("");
   const uniNote = uni ? `<div class="uni-note">+ all universal ${label.toLowerCase()}</div>` : "";
   const body = `<div class="gift-grid">${chips}</div>${uniNote}`;
   if(collapsed){
@@ -546,11 +564,80 @@ function renderVillagerDetail(n){
     `<p class="set-note">Triggers are shown — walkthroughs stay hidden until you tap, so no accidental spoilers.</p>`+
     `<div class="heart-events">${events}</div>`;
   d.querySelector("#vilBack").onclick=backToVilGrid;
+  d.querySelectorAll(".gift.linked").forEach(g=>g.onclick=()=>{ showSection("items"); openItem(g.dataset.item); });
   d.querySelectorAll(".tier-head.collapsible").forEach(h=>h.onclick=()=>{ h.classList.toggle("open"); h.nextElementSibling.classList.toggle("collapsed"); });
   d.querySelectorAll(".he-spoiler-btn").forEach(b=>b.onclick=()=>{
     const sp=b.nextElementSibling; const open=sp.classList.toggle("collapsed")===false;
     b.textContent = open ? "🙉 Hide walkthrough" : "🙈 Show walkthrough (spoiler)";
   });
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+/* ===================== Items ===================== */
+function renderItemGrid(){
+  document.getElementById("itemDetail").classList.add("hidden");
+  const grid=document.getElementById("itemGrid"); grid.classList.remove("hidden"); grid.innerHTML="";
+  let list=(typeof ITEMS!=="undefined"?[...ITEMS]:[]).sort((a,b)=>a.name.localeCompare(b.name));
+  if(itemSearch) list=list.filter(it=>it.name.toLowerCase().includes(itemSearch));
+  if(!list.length){ const m=document.createElement("div"); m.className="empty-msg"; m.textContent="No items found 🔎"; grid.append(m); return; }
+  const frag=document.createDocumentFragment();
+  list.forEach(it=>{
+    const c=document.createElement("button"); c.className="item-card";
+    c.innerHTML=`<img src="${itemImg(it.slug)}" alt="${it.name}" loading="lazy" onerror="this.style.visibility='hidden'">`+
+      `<div class="ic-name">${it.name}</div>`+(it.sell?`<div class="ic-sell">🪙 ${it.sell}g</div>`:"");
+    c.onclick=()=>openItem(it.slug);
+    frag.append(c);
+  });
+  grid.append(frag);
+}
+function openItem(slug){ if(!ITEM_BY_SLUG[slug]) return; currentItem=slug; renderItemDetail(slug); }
+function backToItemGrid(){ currentItem=null; renderItemGrid(); window.scrollTo({top:0,behavior:"smooth"}); }
+
+function reactionRow(label,emoji,keys,cls){
+  if(!keys||!keys.length) return "";
+  const ps=keys.map(k=>{ const n=NPC_BY_KEY[k]; if(!n) return "";
+    return `<button class="react-npc" data-npc="${k}"><img src="${npcImg(k)}" alt="${n.name}" loading="lazy" onerror="this.style.display='none'"><span>${n.name}</span></button>`;
+  }).join("");
+  return `<div class="react-tier ${cls}"><div class="react-h">${emoji} ${label} <b>(${keys.length})</b></div><div class="react-npcs">${ps}</div></div>`;
+}
+function renderItemDetail(slug){
+  const it=ITEM_BY_SLUG[slug]; if(!it) return;
+  document.getElementById("itemGrid").classList.add("hidden");
+  const d=document.getElementById("itemDetail"); d.classList.remove("hidden");
+  const crop=CROP_BY_SLUG[slug];
+  let how=it.source;
+  if(!how && it.cat==="fish") how=[it.loc,it.time,it.weather].filter(Boolean).join(" · ");
+  if(!how && crop) how="Grown in "+crop.seasons.join(" / ")+(crop.type==="tree"?" (fruit tree)":"");
+  if(!how) how="—";
+  const buy = crop ? (crop.seed>0 ? crop.seed.toLocaleString()+"g (seeds)" : "Foraged seeds") : "—";
+  const season = it.season || (crop?crop.seasons.join(" / "):"") || "—";
+  const stats=[
+    ["🪙 Sell", it.sell?it.sell+"g":"—"],
+    ["🛒 Buy", buy],
+    ["🗓️ Season", season],
+  ];
+  if(crop){ stats.push(["⏱️ Grows", crop.grow+" days"]); stats.push(["🔁 Produces", crop.regrow?("every "+crop.regrow+" days"):"once"]); }
+  const reactions =
+    reactionRow("Loved by","💖",it.love,"t-loves")+
+    reactionRow("Liked by","🙂",it.like,"t-likes")+
+    reactionRow("Disliked by","😕",it.dislike,"t-dislikes")+
+    reactionRow("Hated by","💢",it.hate,"t-hates")+
+    reactionRow("Neutral","😐",it.neutral,"t-neutral");
+  const bundles = ITEM_BUNDLES[slug] ? [...ITEM_BUNDLES[slug]] : [];
+  const bundleHtml = bundles.length ? `<div class="item-bundles"><h4>🧺 Used in bundles</h4><div class="ib-list">`+
+    bundles.map(b=>`<span class="ib-chip">${b}</span>`).join("")+`</div></div>` : "";
+  const wiki="https://stardewvalleywiki.com/"+encodeURIComponent(it.name.replace(/ /g,"_"));
+  d.innerHTML=
+    `<button class="vil-back" id="itemBack">← All items</button>`+
+    `<div class="item-hero"><img src="${itemImg(slug)}" alt="${it.name}" onerror="this.style.visibility='hidden'">`+
+      `<div><h2>${it.name}</h2><div class="item-cat">${it.cat}</div></div></div>`+
+    `<div class="item-stats">`+stats.map(([k,v])=>`<div class="is"><span>${k}</span><b>${v}</b></div>`).join("")+`</div>`+
+    `<div class="item-how"><h4>📍 How to get it</h4><p>${how}</p></div>`+
+    (reactions?`<h3 class="react-title">🎁 Gift reactions</h3><p class="set-note">Tap a villager to open their page.</p><div class="reactions">${reactions}</div>`:"")+
+    bundleHtml+
+    `<a class="wiki-link" href="${wiki}" target="_blank" rel="noopener">Full details on the wiki ↗</a>`;
+  d.querySelector("#itemBack").onclick=backToItemGrid;
+  d.querySelectorAll(".react-npc").forEach(b=>b.onclick=()=>{ showSection("villagers"); openVillager(NPC_BY_KEY[b.dataset.npc]); });
   window.scrollTo({top:0,behavior:"smooth"});
 }
 
@@ -644,6 +731,7 @@ function rerender(){
 
 /* ===================== Init ===================== */
 load();
+buildIndexes();
 applyDark(); applySoundBtn(); applyPetalsBtn();
 if(today){ calSeason=today.season; cropSeason=today.season; setPetalSeason(today.season); }
 rerender();
@@ -685,3 +773,7 @@ searchClear.onclick=()=>{ searchEl.value=""; searchTerm=""; searchClear.classLis
 const vilEl=document.getElementById("vilSearch"), vilClear=document.getElementById("vilSearchClear");
 vilEl.addEventListener("input",()=>{ vilSearch=vilEl.value.trim().toLowerCase(); vilClear.classList.toggle("show",vilSearch.length>0); currentVil=null; renderVillagerGrid(); });
 vilClear.onclick=()=>{ vilEl.value=""; vilSearch=""; vilClear.classList.remove("show"); currentVil=null; renderVillagerGrid(); };
+// item search
+const itEl=document.getElementById("itemSearch"), itClear=document.getElementById("itemSearchClear");
+itEl.addEventListener("input",()=>{ itemSearch=itEl.value.trim().toLowerCase(); itClear.classList.toggle("show",itemSearch.length>0); currentItem=null; renderItemGrid(); });
+itClear.onclick=()=>{ itEl.value=""; itemSearch=""; itClear.classList.remove("show"); currentItem=null; renderItemGrid(); };

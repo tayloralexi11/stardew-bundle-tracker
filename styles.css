@@ -117,18 +117,18 @@ header h1{
 .toolbar #btnSound.on{ background:var(--lemon); }
 .toolbar #btnPetals.on{ background:var(--pink); }
 .search-wrap{ position:relative; display:flex; align-items:center; }
-#search{
+#search, #vilSearch, #itemSearch{
   font-family:inherit; font-size:.85rem; color:var(--ink);
   background:var(--surface); border:2px solid var(--surface-2); border-radius:99px;
   padding:8px 30px 8px 14px; width:210px; box-shadow:var(--shadow); outline:none;
 }
-#search:focus{ border-color:var(--lav-deep); }
-#search::placeholder{ color:var(--ink-soft); }
-#searchClear{
+#search:focus, #vilSearch:focus, #itemSearch:focus{ border-color:var(--lav-deep); }
+#search::placeholder, #vilSearch::placeholder, #itemSearch::placeholder{ color:var(--ink-soft); }
+#searchClear, #vilSearchClear, #itemSearchClear{
   position:absolute; right:6px; border:none; background:transparent; cursor:pointer;
   color:var(--ink-soft); font-size:.9rem; padding:2px 6px; display:none;
 }
-#searchClear.show{ display:block; }
+#searchClear.show, #vilSearchClear.show, #itemSearchClear.show{ display:block; }
 
 /* ---------- Filter / season chips ---------- */
 .controls{ display:flex; gap:18px; justify-content:center; flex-wrap:wrap; margin:14px auto 0; padding:0 14px; max-width:920px; }
@@ -419,9 +419,48 @@ button.tier-head.collapsible{ cursor:pointer; }
 .he-choice:nth-child(even){ background:var(--surface-2); }
 .he-choice b.pos{ color:var(--done-deep); } .he-choice b.neg{ color:#e06b6b; } .he-choice b.zero{ color:var(--ink-soft); }
 .npc-fullpage{ width:100%; margin-top:8px; border:none; cursor:pointer; font-family:inherit; font-weight:700; color:var(--ink); background:linear-gradient(135deg,var(--pink),var(--lav)); padding:10px; border-radius:14px; }
+.love-chip.linked{ cursor:pointer; }
+.love-chip.linked:hover{ background:var(--lav); }
+.gift{ border:none; font-family:inherit; text-align:left; }
+.gift.linked{ cursor:pointer; }
+.gift.linked:hover{ background:var(--lav); }
+
+/* ===================== Items ===================== */
+.item-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(110px,1fr)); gap:12px; margin-top:8px; }
+.item-card{ border:3px solid var(--surface); cursor:pointer; font-family:inherit; color:var(--ink); background:var(--card); border-radius:18px; box-shadow:var(--shadow); padding:12px 8px; text-align:center; transition:transform .15s, border-color .2s; }
+.item-card:hover{ transform:translateY(-3px); border-color:var(--lav); }
+.item-card img{ width:46px; height:46px; image-rendering:pixelated; object-fit:contain; filter:drop-shadow(0 1px 1px rgba(0,0,0,.12)); }
+.ic-name{ font-weight:700; font-size:.82rem; margin-top:5px; line-height:1.15; }
+.ic-sell{ font-size:.72rem; color:var(--ink-soft); margin-top:2px; }
+
+.crop-card.clickable{ cursor:pointer; transition:transform .15s, border-color .2s; }
+.crop-card.clickable:hover{ transform:translateY(-3px); border-color:var(--lav); }
+
+.item-hero{ display:flex; align-items:center; gap:16px; background:var(--card); border-radius:22px; box-shadow:var(--shadow); border:3px solid var(--surface); padding:16px; margin:8px 0 14px; }
+.item-hero img{ width:64px; height:64px; image-rendering:pixelated; object-fit:contain; }
+.item-hero h2{ font-size:1.5rem; }
+.item-cat{ display:inline-block; margin-top:4px; font-size:.72rem; font-weight:700; color:var(--ink-soft); background:var(--surface-2); padding:3px 10px; border-radius:99px; text-transform:capitalize; }
+.item-stats{ display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:8px; margin-bottom:14px; }
+.item-stats .is{ display:flex; justify-content:space-between; background:var(--card); border:2px solid var(--surface); border-radius:12px; padding:8px 12px; box-shadow:var(--shadow); font-size:.85rem; }
+.item-stats .is span{ color:var(--ink-soft); }
+.item-how{ background:var(--card); border-radius:16px; box-shadow:var(--shadow); border:2px solid var(--surface); padding:12px 14px; margin-bottom:14px; }
+.item-how h4{ font-size:.9rem; margin-bottom:4px; } .item-how p{ font-size:.86rem; line-height:1.4; }
+.react-title{ font-size:1.3rem; margin:18px 0 2px; }
+.reactions{ display:flex; flex-direction:column; gap:10px; }
+.react-tier{ background:var(--card); border-radius:16px; box-shadow:var(--shadow); border:2px solid var(--surface); padding:12px; }
+.react-tier.t-loves{ border-color:#ffc1da; } .react-tier.t-likes{ border-color:#cdebc2; }
+.react-tier.t-dislikes{ border-color:#ffd9b3; } .react-tier.t-hates{ border-color:#ffc0c0; }
+.react-h{ font-weight:700; font-size:.95rem; margin-bottom:8px; }
+.react-npcs{ display:flex; flex-wrap:wrap; gap:8px; }
+.react-npc{ border:none; cursor:pointer; font-family:inherit; color:var(--ink); background:var(--surface); border-radius:12px; padding:5px 9px 5px 5px; display:flex; align-items:center; gap:6px; font-size:.78rem; font-weight:600; transition:transform .12s; }
+.react-npc:hover{ transform:translateY(-1px); background:var(--lav); }
+.react-npc img{ width:30px; height:30px; border-radius:50%; object-fit:cover; }
+.item-bundles{ margin-top:16px; } .item-bundles h4{ font-size:.95rem; margin-bottom:6px; }
+.ib-list{ display:flex; flex-wrap:wrap; gap:6px; } .ib-chip{ background:var(--lemon); padding:5px 11px; border-radius:99px; font-size:.78rem; font-weight:600; }
+.wiki-link{ display:inline-block; margin:18px 0 4px; color:var(--lav-deep); font-size:.84rem; font-weight:700; }
 
 @media(max-width:520px){
   .room-head .reward,.season-head .sub{display:none}
   header h1{font-size:1.5rem}
-  #search{ width:150px; }
+  #search, #vilSearch, #itemSearch{ width:150px; }
 }

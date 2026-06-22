@@ -88,6 +88,18 @@
       <div class="crop-grid" id="cropGrid"></div>
     </section>
 
+    <!-- ============ ITEMS ============ -->
+    <section id="view-items" class="view-section hidden">
+      <div class="vil-searchbar">
+        <div class="search-wrap">
+          <input id="itemSearch" type="text" placeholder="🔎 Search items…" autocomplete="off">
+          <button id="itemSearchClear" title="Clear">✕</button>
+        </div>
+      </div>
+      <div class="item-grid" id="itemGrid"></div>
+      <div class="item-detail hidden" id="itemDetail"></div>
+    </section>
+
     <!-- ============ VILLAGERS ============ -->
     <section id="view-villagers" class="view-section hidden">
       <div class="vil-searchbar">
@@ -107,6 +119,7 @@
     <button data-section="calendar" class="navbtn"><span class="ni">📅</span><span>Calendar</span></button>
     <button data-section="crops" class="navbtn"><span class="ni">🌱</span><span>Crops</span></button>
     <button data-section="villagers" class="navbtn"><span class="ni">👥</span><span>Villagers</span></button>
+    <button data-section="items" class="navbtn"><span class="ni">📦</span><span>Items</span></button>
   </nav>
 
   <!-- ============ SETTINGS PANEL ============ -->
@@ -137,6 +150,7 @@
   <script src="data.js"></script>
   <script src="data-npcs.js"></script>
   <script src="data-crops.js"></script>
+  <script src="data-items.js"></script>
   <script src="app.js"></script>
   <script>
     if ("serviceWorker" in navigator) {
